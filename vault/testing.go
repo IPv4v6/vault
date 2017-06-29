@@ -306,6 +306,13 @@ func TestIdentityStoreWithGithubAuth(t testing.TB) *identityStore {
 	}
 	meGH.UUID = meGHUUID
 
+	// Mount accessor for github auth
+	githubAccessor, err := c.generateMountAccessor("github")
+	if err != nil {
+		panic(fmt.Sprintf("could not generate github accessor: %v", err))
+	}
+	meGH.Accessor = githubAccessor
+
 	// Storage view for github auth
 	ghView := NewBarrierView(c.barrier, credentialBarrierPrefix+meGH.UUID+"/")
 

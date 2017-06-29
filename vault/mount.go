@@ -850,6 +850,10 @@ func (c *Core) requiredMountTable() *MountTable {
 	if err != nil {
 		panic(fmt.Sprintf("could not create identity mount entry UUID: %v", err))
 	}
+	identityAccessor, err := c.generateMountAccessor("identity")
+	if err != nil {
+		panic(fmt.Sprintf("could not generate identity accessor: %v", err))
+	}
 
 	identityMount := &MountEntry{
 		Table:       mountTableType,
@@ -857,6 +861,7 @@ func (c *Core) requiredMountTable() *MountTable {
 		Type:        "identity",
 		Description: "identity store",
 		UUID:        identityUUID,
+		Accessor:    identityAccessor,
 	}
 
 	table.Entries = append(table.Entries, cubbyholeMount)

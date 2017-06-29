@@ -1,6 +1,7 @@
 package vault
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -46,6 +47,13 @@ func TestIdentityStore_RestoringEntities(t *testing.T) {
 		t.Fatal(err)
 	}
 	meGH.UUID = meGHUUID
+
+	// Mount accessor for github auth
+	githubAccessor, err := c.generateMountAccessor("github")
+	if err != nil {
+		panic(fmt.Sprintf("could not generate github accessor: %v", err))
+	}
+	meGH.Accessor = githubAccessor
 
 	// Storage view for github auth
 	ghView := NewBarrierView(c.barrier, credentialBarrierPrefix+meGH.UUID+"/")
