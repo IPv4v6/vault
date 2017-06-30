@@ -53,10 +53,13 @@ type identityStore struct {
 	// to enable richer queries based on multiple indexes.
 	db *memdb.MemDB
 
-	// validateMountPathFunc is a utility from router which returns the properties
-	// of the mount given the mount path. This is useful to verify the input
-	// supplied over the identity store's API.
+	// validateMountPathFunc is a utility from router which returns the
+	// properties of the mount given the mount path.
 	validateMountPathFunc func(string) *validateMountResponse
+
+	// validateMountAccessorFunc is a utility from router which returnes the
+	// properties of the mount given the mount accessor.
+	validateMountAccessorFunc func(string) *validateMountResponse
 
 	// entityLocks are a set of 256 locks to which all the entities will be
 	// categorized to while performing storage modifications.
@@ -139,6 +142,11 @@ type personaIndexEntry struct {
 	// the API.
 	MountID string `json:"mount_id" structs:"-" mapstructure:"mount_id"`
 
+	// MountType is the backend mount's type to which this persona belongs to.
+	// This enables categorically querying personas of specific backend
+	// types.
+	MountType string `json:"mount_type" structs:"mount_type" mapstructure:"mount_type"`
+
 	// Metadata is the explicit metadata that clients set against an entity
 	// which enables virtual grouping of personas. Personas will be indexed
 	// against their metadata.
@@ -150,11 +158,6 @@ type personaIndexEntry struct {
 	// unique way. Personas will be indexed based on this combined uniqueness
 	// factor.
 	Name string `json:"name" structs:"name" mapstructure:"name"`
-
-	// MountType is the backend mount's type to which this persona belongs to.
-	// This enables categorically querying personas of specific backend
-	// types.
-	MountType string `json:"mount_type" structs:"mount_type" mapstructure:"mount_type"`
 
 	// CreationTime is the time at which this persona was first created
 	CreationTime time.Time `json:"creation_time" structs:"creation_time" mapstructure:"creation_time"`

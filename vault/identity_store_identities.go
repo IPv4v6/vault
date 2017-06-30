@@ -23,6 +23,10 @@ func personaPaths(i *identityStore) []*framework.Path {
 					Type:        framework.TypeString,
 					Description: "Entity ID to which this persona belongs to",
 				},
+				"mount_accessor": {
+					Type:        framework.TypeString,
+					Description: "Mount accessor to which this persona belongs to",
+				},
 				"mount_path": {
 					Type:        framework.TypeString,
 					Description: "Mount path to which this persona belongs to",
@@ -53,6 +57,10 @@ func personaPaths(i *identityStore) []*framework.Path {
 				"entity_id": {
 					Type:        framework.TypeString,
 					Description: "Entity ID to which this persona should be tied to",
+				},
+				"mount_accessor": {
+					Type:        framework.TypeString,
+					Description: "Mount accessor to which this persona belongs to",
 				},
 				"mount_path": {
 					Type:        framework.TypeString,
@@ -148,8 +156,24 @@ func (i *identityStore) handlePersonaUpdateCommon(req *logical.Request, d *frame
 
 	// Get mount path to which the persona belongs to
 	mountPath := d.Get("mount_path").(string)
-	if mountPath == "" {
-		return logical.ErrorResponse("missing mount path"), nil
+	mountAccessor := d.Get("mount_accessor").(string)
+
+	var mountValidationResp *validateMountResponse
+	switch {
+	case mountPath == "" && mountAccessor == "":
+		return logical.ErrorResponse("either mount_path or mount_accessor needs to be set"), nil
+	case mountPath != "" && mountAccessor != "":
+		return logical.ErrorResponse("only one of mount_path or mount_accessor should be set"), nil
+	case mountPath != "":
+		mountValidationResp = i.validateMountPathFunc(mountPath)
+		if mountValidationResp == nil {
+			return logical.ErrorResponse(fmt.Sprintf("invalid mount path %q", mountPath)), nil
+		}
+	case mountAccessor != "":
+		mountValidationResp = i.validateMountAccessorFunc(mountAccessor)
+		if mountValidationResp == nil {
+			return logical.ErrorResponse(fmt.Sprintf("invalid mount accessor %q", mountAccessor)), nil
+		}
 	}
 
 	// Get persona metadata
@@ -163,11 +187,6 @@ func (i *identityStore) handlePersonaUpdateCommon(req *logical.Request, d *frame
 		if err != nil {
 			return logical.ErrorResponse(fmt.Sprintf("failed to parse persona metadata: %v", err)), nil
 		}
-	}
-
-	mountValidationResp := i.validateMountPathFunc(mountPath)
-	if mountValidationResp == nil {
-		return logical.ErrorResponse(fmt.Sprintf("invalid mount path %q", mountPath)), nil
 	}
 
 	personaByFactors, err := i.memDBPersonaByFactors(mountValidationResp.MountID, personaName)

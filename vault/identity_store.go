@@ -21,11 +21,12 @@ func NewIdentityStore(core *Core, config *logical.BackendConfig) (*identityStore
 	}
 
 	iStore := &identityStore{
-		view:                  config.StorageView,
-		db:                    db,
-		entityLocks:           locksutil.CreateLocks(),
-		logger:                core.logger,
-		validateMountPathFunc: core.router.validateMount,
+		view:                      config.StorageView,
+		db:                        db,
+		entityLocks:               locksutil.CreateLocks(),
+		logger:                    core.logger,
+		validateMountPathFunc:     core.router.validateMountByPath,
+		validateMountAccessorFunc: core.router.validateMountByAccessor,
 	}
 
 	packerConfig := &storagePackerConfig{

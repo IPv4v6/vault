@@ -48,13 +48,36 @@ type routeEntry struct {
 }
 
 type validateMountResponse struct {
-	MountID   string `json:"mount_id" structs:"mount_id" mapstructure:"mount_id"`
-	MountType string `json:"mount_type" structs:"mount_type" mapstructure:"mount_type"`
+	MountID       string `json:"mount_id" structs:"mount_id" mapstructure:"mount_id"`
+	MountType     string `json:"mount_type" structs:"mount_type" mapstructure:"mount_type"`
+	MountAccessor string `json:"mount_accessor" structs:"mount_accessor" mapstructure:"mount_accessor"`
 }
 
-// validateMount returns the mount type if the given path refers to a valid
-// mount
-func (r *Router) validateMount(path string) *validateMountResponse {
+// validateMountByAccessor returns the mount type and ID for a given mount
+// accessor
+func (r *Router) validateMountByAccessor(accessor string) *validateMountResponse {
+	if accessor == "" {
+		return nil
+	}
+
+	mountEntry := r.MatchingMountByAccessor(accessor)
+	if mountEntry == nil {
+		return nil
+	}
+
+	return &validateMountResponse{
+		MountAccessor: mountEntry.Accessor,
+		MountType:     mountEntry.Type,
+		MountID:       mountEntry.UUID,
+	}
+}
+
+// validateMountByPath returns the mount type and ID for a given path
+func (r *Router) validateMountByPath(path string) *validateMountResponse {
+	if path == "" {
+		return nil
+	}
+
 	if !strings.HasSuffix(path, "/") {
 		path += "/"
 	}
@@ -69,8 +92,9 @@ func (r *Router) validateMount(path string) *validateMountResponse {
 	}
 
 	return &validateMountResponse{
-		MountType: mountEntry.Type,
-		MountID:   mountEntry.UUID,
+		MountAccessor: mountEntry.Accessor,
+		MountType:     mountEntry.Type,
+		MountID:       mountEntry.UUID,
 	}
 }
 
