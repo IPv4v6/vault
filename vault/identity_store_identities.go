@@ -255,6 +255,7 @@ func (i *identityStore) handlePersonaUpdateCommon(req *logical.Request, d *frame
 	persona.Metadata = personaMetadata
 	persona.MountID = mountValidationResp.MountID
 	persona.MountType = mountValidationResp.MountType
+	persona.MountAccessor = mountValidationResp.MountAccessor
 
 	// Set the entity ID in the persona index. This should be done after
 	// sanitizing entity.

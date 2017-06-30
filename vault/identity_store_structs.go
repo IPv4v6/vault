@@ -147,6 +147,10 @@ type personaIndexEntry struct {
 	// types.
 	MountType string `json:"mount_type" structs:"mount_type" mapstructure:"mount_type"`
 
+	// MountAccessor is the backend mount's accessor to which this persona
+	// belongs to.
+	MountAccessor string `json:"mount_accessor" structs:"mount_accessor" mapstructure:"mount_accessor"`
+
 	// Metadata is the explicit metadata that clients set against an entity
 	// which enables virtual grouping of personas. Personas will be indexed
 	// against their metadata.
